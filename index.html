@@ -64,7 +64,7 @@
 </head>
 <body class="font-sans text-gray-800 antialiased bg-white selection:bg-brand selection:text-white">
 
-    <header class="absolute top-0 left-0 w-full z-50 border-b border-white/10 bg-black/20 backdrop-blur-lg">
+    <header class="fixed top-0 left-0 w-full z-50 border-b border-white/10 bg-black/20 backdrop-blur-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-24"> 
                 <div class="flex-shrink-0 group cursor-pointer">
@@ -90,13 +90,36 @@
                 </div>
 
                 <div class="md:hidden flex items-center">
-                    <button class="text-white hover:text-brand transition-colors duration-300 focus:outline-none">
+                    <button id="mobile-menu-open" class="text-white hover:text-brand transition-colors duration-300 focus:outline-none" aria-label="Відкрити меню" aria-controls="mobile-menu" aria-expanded="false">
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                     </button>
                 </div>
             </div>
         </div>
     </header>
+
+    <div id="mobile-menu" class="fixed inset-0 z-[60] pointer-events-none">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-md opacity-0 transition-opacity duration-300" data-menu-overlay></div>
+        <div class="absolute top-0 right-0 h-full w-full max-w-sm bg-[#0d0d0d]/95 border-l border-white/10 shadow-2xl transform translate-x-full transition-transform duration-500 ease-out" data-menu-panel>
+            <div class="flex items-center justify-between px-8 py-7 border-b border-white/10">
+                <span class="text-white text-xl font-black tracking-tight">Меню</span>
+                <button id="mobile-menu-close" class="w-11 h-11 rounded-full border border-white/10 text-white/80 hover:text-white hover:border-brand/40 hover:bg-brand/10 transition-all duration-300" aria-label="Закрити меню">
+                    <svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <nav class="px-8 py-10">
+                <ul class="flex flex-col gap-6 text-white/90 font-semibold text-lg uppercase tracking-widest">
+                    <li><a href="#about" class="mobile-menu-link hover:text-white transition-colors duration-300">Про курс</a></li>
+                    <li><a href="#program" class="mobile-menu-link hover:text-white transition-colors duration-300">Програма</a></li>
+                    <li><a href="#reviews" class="mobile-menu-link hover:text-white transition-colors duration-300">Відгуки</a></li>
+                    <li><a href="#faq" class="mobile-menu-link hover:text-white transition-colors duration-300">FAQ</a></li>
+                </ul>
+                <a href="#buy" class="mobile-menu-link mt-10 inline-flex items-center justify-center w-full bg-brand text-white font-black py-4 rounded-full text-lg shadow-glow hover:shadow-[0_0_50px_-10px_rgba(242,85,44,0.8)] transition-all duration-300">
+                    Придбати
+                </a>
+            </nav>
+        </div>
+    </div>
 
     <section class="relative w-full min-h-[100vh] flex items-center justify-center bg-dark bg-cover bg-center bg-no-repeat pt-32 pb-24 overflow-hidden" 
              style="background-image: url('./images/hero-bg.jpg');">
@@ -576,6 +599,47 @@
                         icon.classList.add('open');
                     }
                 });
+            });
+
+            // Мобильное меню
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuOpen = document.getElementById('mobile-menu-open');
+            const mobileMenuClose = document.getElementById('mobile-menu-close');
+            const mobileMenuPanel = mobileMenu ? mobileMenu.querySelector('[data-menu-panel]') : null;
+            const mobileMenuOverlay = mobileMenu ? mobileMenu.querySelector('[data-menu-overlay]') : null;
+            const mobileMenuLinks = document.querySelectorAll('.mobile-menu-link');
+
+            function openMobileMenu() {
+                if (!mobileMenu || !mobileMenuPanel || !mobileMenuOverlay) return;
+                mobileMenu.classList.remove('pointer-events-none');
+                mobileMenuOverlay.classList.remove('opacity-0');
+                mobileMenuPanel.classList.remove('translate-x-full');
+                if (mobileMenuOpen) mobileMenuOpen.setAttribute('aria-expanded', 'true');
+            }
+
+            function closeMobileMenu() {
+                if (!mobileMenu || !mobileMenuPanel || !mobileMenuOverlay) return;
+                mobileMenuPanel.classList.add('translate-x-full');
+                mobileMenuOverlay.classList.add('opacity-0');
+                if (mobileMenuOpen) mobileMenuOpen.setAttribute('aria-expanded', 'false');
+                setTimeout(() => {
+                    if (mobileMenuOverlay.classList.contains('opacity-0')) {
+                        mobileMenu.classList.add('pointer-events-none');
+                    }
+                }, 300);
+            }
+
+            if (mobileMenuOpen) {
+                mobileMenuOpen.addEventListener('click', openMobileMenu);
+            }
+            if (mobileMenuClose) {
+                mobileMenuClose.addEventListener('click', closeMobileMenu);
+            }
+            if (mobileMenuOverlay) {
+                mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+            }
+            mobileMenuLinks.forEach(link => {
+                link.addEventListener('click', closeMobileMenu);
             });
 
         });
