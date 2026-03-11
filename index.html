@@ -134,7 +134,7 @@
     </div>
 
     <div class="fixed inset-x-0 bottom-0 z-[65] px-4 pb-4 pointer-events-none">
-        <div class="max-w-7xl mx-auto flex justify-center pointer-events-auto">
+        <div class="max-w-7xl mx-auto flex justify-center sm:justify-end pointer-events-auto">
             <button type="button" data-open-image="./images/somnitelno-no-okei.jpg" class="w-full sm:w-auto bg-brand text-white font-black py-4 px-6 sm:px-10 rounded-2xl text-base sm:text-lg shadow-glow hover:shadow-[0_0_60px_-10px_rgba(242,85,44,0.8)] transition-all duration-300 flex items-center justify-center gap-3">
                 Купити курс зараз
                 <span class="inline-flex items-center justify-center bg-white/20 text-white text-xs sm:text-sm font-black px-2.5 py-1 rounded-full">-51%</span>
@@ -550,7 +550,7 @@
             </div>
             
             <p class="text-gray-600 text-sm font-medium">© 2024 Hannah Soy Candles. Всі права захищені.</p>
-            <p class="text-gray-500 text-sm font-medium mt-3 sm:self-end">
+            <p class="text-gray-500 text-sm font-medium mt-3 sm:self-center sm:text-center">
                 Дизайн та розробка:
                 <a href="https://www.instagram.com/mazoxxa/" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-white transition-colors duration-300">
                     Владислав Малойло
@@ -567,28 +567,34 @@
             const minutesEl = document.querySelector('.timer-minutes');
             const secondsEl = document.querySelector('.timer-seconds');
             
-            const TIMER_DURATION_MS = 14 * 60 * 60 * 1000;
-            const TIMER_STORAGE_KEY = 'heroCountdownStartMs';
+            const TIMER_STORAGE_KEY = 'heroCountdownNextResetMs';
+
+            function getNextResetMs(fromMs) {
+                const base = new Date(fromMs);
+                const reset = new Date(base);
+                reset.setHours(3, 0, 0, 0);
+                if (reset.getTime() <= fromMs) {
+                    reset.setDate(reset.getDate() + 1);
+                }
+                return reset.getTime();
+            }
 
             if (hoursEl && minutesEl && secondsEl) {
-                let startMs = parseInt(localStorage.getItem(TIMER_STORAGE_KEY), 10);
-                if (!Number.isFinite(startMs)) {
-                    startMs = Date.now();
-                    localStorage.setItem(TIMER_STORAGE_KEY, String(startMs));
+                let nextResetMs = parseInt(localStorage.getItem(TIMER_STORAGE_KEY), 10);
+                const nowInit = Date.now();
+                if (!Number.isFinite(nextResetMs) || nextResetMs <= nowInit) {
+                    nextResetMs = getNextResetMs(nowInit);
+                    localStorage.setItem(TIMER_STORAGE_KEY, String(nextResetMs));
                 }
 
                 function updateTimer() {
                     const now = Date.now();
-                    let elapsed = now - startMs;
-
-                    if (elapsed >= TIMER_DURATION_MS) {
-                        const periods = Math.floor(elapsed / TIMER_DURATION_MS);
-                        startMs += periods * TIMER_DURATION_MS;
-                        localStorage.setItem(TIMER_STORAGE_KEY, String(startMs));
-                        elapsed = now - startMs;
+                    if (now >= nextResetMs) {
+                        nextResetMs = getNextResetMs(now);
+                        localStorage.setItem(TIMER_STORAGE_KEY, String(nextResetMs));
                     }
 
-                    const remainingMs = Math.max(0, TIMER_DURATION_MS - elapsed);
+                    const remainingMs = Math.max(0, nextResetMs - now);
                     const totalSeconds = Math.floor(remainingMs / 1000);
                     const h = Math.floor(totalSeconds / 3600);
                     const m = Math.floor((totalSeconds % 3600) / 60);
