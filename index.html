@@ -133,6 +133,15 @@
         </div>
     </div>
 
+    <div class="fixed inset-x-0 bottom-0 z-[65] px-4 pb-4 pointer-events-none">
+        <div class="max-w-7xl mx-auto flex justify-center pointer-events-auto">
+            <button type="button" data-open-image="./images/somnitelno-no-okei.jpg" class="w-full sm:w-auto bg-brand text-white font-black py-4 px-6 sm:px-10 rounded-2xl text-base sm:text-lg shadow-glow hover:shadow-[0_0_60px_-10px_rgba(242,85,44,0.8)] transition-all duration-300 flex items-center justify-center gap-3">
+                Купити курс зараз
+                <span class="inline-flex items-center justify-center bg-white/20 text-white text-xs sm:text-sm font-black px-2.5 py-1 rounded-full">-51%</span>
+            </button>
+        </div>
+    </div>
+
     <section class="relative w-full min-h-[100vh] flex items-center justify-center bg-dark bg-cover bg-center bg-no-repeat pt-32 pb-24 overflow-hidden" 
              style="background-image: url('./images/hero-bg.jpg');">
         
@@ -447,13 +456,25 @@
 
                         <div class="min-w-full flex justify-center p-8 md:p-12">
                             <div class="relative w-full max-w-md rounded-3xl overflow-hidden shadow-glow border border-white/20 transform hover:scale-[1.02] transition-transform duration-500">
-                                <img src="./images/avatar-2.jpg" alt="Скриншот відгуку 2" class="w-full h-auto object-contain bg-black/50">
+                                <img src="./images/avatar-2.JPG" alt="Скриншот відгуку 2" class="w-full h-auto object-contain bg-black/50">
                             </div>
                         </div>
 
                         <div class="min-w-full flex justify-center p-8 md:p-12">
                             <div class="relative w-full max-w-md rounded-3xl overflow-hidden shadow-glow border border-white/20 transform hover:scale-[1.02] transition-transform duration-500">
-                                <img src="./images/avatar-3.jpg" alt="Скриншот відгуку 3" class="w-full h-auto object-contain bg-black/50">
+                                <img src="./images/avatar-3.JPG" alt="Скриншот відгуку 3" class="w-full h-auto object-contain bg-black/50">
+                            </div>
+                        </div>
+
+                        <div class="min-w-full flex justify-center p-8 md:p-12">
+                            <div class="relative w-full max-w-md rounded-3xl overflow-hidden shadow-glow border border-white/20 transform hover:scale-[1.02] transition-transform duration-500">
+                                <img src="./images/avatar-4.JPG" alt="Скриншот відгуку 4" class="w-full h-auto object-contain bg-black/50">
+                            </div>
+                        </div>
+
+                        <div class="min-w-full flex justify-center p-8 md:p-12">
+                            <div class="relative w-full max-w-md rounded-3xl overflow-hidden shadow-glow border border-white/20 transform hover:scale-[1.02] transition-transform duration-500">
+                                <img src="./images/avatar-5.JPG" alt="Скриншот відгуку 5" class="w-full h-auto object-contain bg-black/50">
                             </div>
                         </div>
                         
@@ -540,23 +561,40 @@
             const minutesEl = document.querySelector('.timer-minutes');
             const secondsEl = document.querySelector('.timer-seconds');
             
-            let timeRemaining = (14 * 60 * 60) + (35 * 60) + 10;
+            const TIMER_DURATION_MS = 14 * 60 * 60 * 1000;
+            const TIMER_STORAGE_KEY = 'heroCountdownStartMs';
 
             if (hoursEl && minutesEl && secondsEl) {
+                let startMs = parseInt(localStorage.getItem(TIMER_STORAGE_KEY), 10);
+                if (!Number.isFinite(startMs)) {
+                    startMs = Date.now();
+                    localStorage.setItem(TIMER_STORAGE_KEY, String(startMs));
+                }
+
                 function updateTimer() {
-                    if(timeRemaining <= 0) timeRemaining = 0;
-                    const h = Math.floor(timeRemaining / 3600);
-                    const m = Math.floor((timeRemaining % 3600) / 60);
-                    const s = timeRemaining % 60;
+                    const now = Date.now();
+                    let elapsed = now - startMs;
+
+                    if (elapsed >= TIMER_DURATION_MS) {
+                        const periods = Math.floor(elapsed / TIMER_DURATION_MS);
+                        startMs += periods * TIMER_DURATION_MS;
+                        localStorage.setItem(TIMER_STORAGE_KEY, String(startMs));
+                        elapsed = now - startMs;
+                    }
+
+                    const remainingMs = Math.max(0, TIMER_DURATION_MS - elapsed);
+                    const totalSeconds = Math.floor(remainingMs / 1000);
+                    const h = Math.floor(totalSeconds / 3600);
+                    const m = Math.floor((totalSeconds % 3600) / 60);
+                    const s = totalSeconds % 60;
 
                     hoursEl.textContent = h < 10 ? '0' + h : h;
                     minutesEl.textContent = m < 10 ? '0' + m : m;
                     secondsEl.textContent = s < 10 ? '0' + s : s;
-
-                    if(timeRemaining > 0) timeRemaining--;
                 }
-                setInterval(updateTimer, 1000);
+
                 updateTimer();
+                setInterval(updateTimer, 1000);
             }
 
             // Слайдер отзывов
